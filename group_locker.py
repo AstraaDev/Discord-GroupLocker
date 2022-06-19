@@ -3,9 +3,11 @@ import requests
 import os
 import ctypes
 import json
+import time
 from discord.ext import commands
 
 ctypes.windll.kernel32.SetConsoleTitleW(f"Group Locker - Made By Astraa")
+members_list = []
 with open('config.json') as f:
     config = json.load(f)
 token = config.get('token')
@@ -45,22 +47,40 @@ async def on_ready():
 @Astraa.event
 async def on_message(message):
     if Astraa.Locker == True:
+
+        memberid = []
+        actual_members = requests.get(f"https://discord.com/api/v9/channels/{message.channel.id}", headers={"authorization":token}).json()
+        
         #Lock Joins
-        #No idea... If you have one, create an issue on github
+        for member in actual_members['recipients']:
+            memberid = member['id']
+            if memberid not in members_list:
+                try:
+                    req = requests.delete(f"https://discord.com/api/v9/channels/{message.channel.id}/recipients/{memberid}", headers={"authorization":token})
+                except Exception as e:
+                    print(e)
+                    pass
 
         #Lock Leaves
-        if message.content == "":
-            try:
-                res = requests.put(f"https://discord.com/api/v8/channels/{message.channel.id}/recipients/{message.author.id}", headers={"authorization":token})
-            except Exception as e:
-                print(e)
-                pass
+        for member in res['recipients']:
+            memberid = member['id']
+            if memberid not in actual_members:
+                try:
+                    req = requests.put(f"https://discord.com/api/v9/channels/{message.channel.id}/recipients/{memberid}", headers={"authorization":token})
+                except Exception as e:
+                    print(e)
+                    pass
+
     await Astraa.process_commands(message)
 
-@Astraa.command(aliases=["locker", "locked", "grouplocker", "lockgroup"])
+@Astraa.command(aliases=["locker", "grouplocker", "lockgroup"])
 async def lock(ctx, value=None):
     if value == "ON" or value == "on":
         Astraa.Locker = True
+        global res
+        res = requests.get(f"https://discord.com/api/v9/channels/{ctx.channel.id}", headers={"authorization":token}).json()
+        for member in res['recipients']:
+            members_list.append(member['id'])
         await ctx.message.edit(content=f"Groupchat is now **locked**!", delete_after=5)
     elif value == "OFF" or value == "off":
         Astraa.Locker = False
@@ -68,6 +88,7 @@ async def lock(ctx, value=None):
     else:
         await ctx.message.edit(content=f'[ERROR]: Invalid input! Command: `*lock <ON/OFF>`', delete_after=5)
         return
+
 
 if __name__ == '__main__':
     Init()
