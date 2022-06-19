@@ -34,7 +34,7 @@ By using this Tool, you agree that you hold responsibility and accountability of
 
 ## Features
 
-- [ ] - [Lock joins](https://github.com/AstraaDev/Discord-GroupLocker) - Automatically kick the person if they join the group.
+- [x] - [Lock joins](https://github.com/AstraaDev/Discord-GroupLocker) - Automatically kick the person if they join the group.
 - [x] - [Lock leaves](https://github.com/moom825/Discord-GroupLocker) - Automatically re-adds the person if they leave the group.
 
 ## How To Setup/Install
